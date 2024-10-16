@@ -8,20 +8,27 @@ jobs:
 
     steps:
     - name: Download ngrok
-      run: Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
+      run: Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+
     - name: Extract ngrok
-      run: Expand-Archive ngrok.zip -DestinationPath ngrok
+      run: Expand-Archive ngrok.zip
+
     - name: Authenticate ngrok
       run: .\ngrok\ngrok.exe authtoken 2nWtt8ljTb8UaRWAVOtxplMcrrx_2UvgPgf4hacnAqk9jAJoG
+
     - name: Enable Remote Desktop
       run: |
-        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
-        Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
+
+    - name: Set Local User Password
+      run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
+
     - name: Create ngrok Tunnel
       run: .\ngrok\ngrok.exe tcp 3389
-    - name: Set up keep-alive
+
+    - name: Set up Keep-Alive
       run: |
         $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "Add-Content -Path 'C:\keepalive.txt' -Value 'Keep-Alive'"
         $trigger = New-ScheduledTaskTrigger -RepetitionInterval (New-TimeSpan -Minutes 5) -RepeatIndefinitely -At (Get-Date).Date.AddMinutes(1)
