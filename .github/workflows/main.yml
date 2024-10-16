@@ -1,3 +1,5 @@
+name: CI
+
 on: [push, workflow_dispatch]
 
 jobs:
@@ -5,20 +7,20 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Download localxpose
-      run: Invoke-WebRequest https://localxpose.io/download/localxpose-windows-amd64.zip -OutFile localxpose.zip
-    - name: Extract localxpose
-      run: Expand-Archive localxpose.zip -DestinationPath localxpose
-    - name: Authenticate localxpose
-      run: .\localxpose\localxpose.exe authtoken jPlZZY71m9KtBQB4FulmkJMgKkMxTt0GoqOCNlTx
+    - name: Download ngrok
+      run: Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
+    - name: Extract ngrok
+      run: Expand-Archive ngrok.zip -DestinationPath ngrok
+    - name: Authenticate ngrok
+      run: .\ngrok\ngrok.exe authtoken 2nWtt8ljTb8UaRWAVOtxplMcrrx_2UvgPgf4hacnAqk9jAJoG
     - name: Enable Remote Desktop
       run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
         Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
-    - name: Create localxpose Tunnel
-      run: .\localxpose\localxpose.exe tcp 3389
+    - name: Create ngrok Tunnel
+      run: .\ngrok\ngrok.exe tcp 3389
     - name: Set up keep-alive
       run: |
         $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "Add-Content -Path 'C:\keepalive.txt' -Value 'Keep-Alive'"
